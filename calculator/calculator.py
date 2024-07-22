@@ -1,4 +1,5 @@
 import reflex as rx
+from reflex_motion import motion
 
 class Calculator(rx.State):
     result: float = 0
@@ -8,7 +9,7 @@ class Calculator(rx.State):
             1,2,3,"*",
             4,5,6,"-",
             7,8,9,"+",
-            0,".","/","="
+            0,".","/","=", "Clear"
         ]
     def button(self, button_num:int):
         button = self.buttons[button_num]
@@ -16,6 +17,8 @@ class Calculator(rx.State):
             return self.update_input(button)
         elif button == "=":
             return self.calculate()
+        elif button == "Clear":
+            return self.clear()
         elif type(button) is str:
             return self.set_operation(button)
             
@@ -56,36 +59,49 @@ def index():
     return rx.center(
         rx.vstack(
             rx.center(
-                rx.heading("Calculator"),
+                rx.heading("Calculator", size="9", color_scheme="green"),
                 width="100%"
             ),
             rx.center(
-                rx.input(value=Calculator.current_input, is_read_only=True),
+                rx.input(value=Calculator.current_input, is_read_only=True, size="3", color_scheme="green", width="24.5vw", height = "6vh"),
                 width="100%",
             ),
             rx.grid(
                 rx.foreach(
-                    rx.Var.range(16),
-                    lambda i: rx.button(
-                    rx.heading(f"{Calculator.buttons[i]}", size="6"),
-                    color_scheme="green",
-                    radius="large",
-                    align="center",
-                    variant="surface",
-                    height="10vh",
-                    min_width="10vh",
-                    on_click=Calculator.button(i)
+                    rx.Var.range(17),
+                    lambda i: motion(
+                        rx.button(
+                            rx.heading(f"{Calculator.buttons[i]}", size="6"),
+                            color_scheme="green",
+                            radius="large",
+                            align="center",
+                            variant="surface",
+                            height="10vh",
+                            min_width="10vh",
+                            on_click=Calculator.button(i)
+                        ),
+                        while_hover={"scale": 1.1},
+                        while_tap={"scale": 0.9},
+                        transition={"type": "spring", "stiffness": 400, "damping": 17},
                     ),
                 ),
                 columns="4",
                 flow="row",
-                spacing="4",
+                spacing="2",
                 max_width="50vw",
+                padding_left = "1vw"
             ),
         ),
-        padding_top = "20vh"
+        padding_top = "12vh"
     )
 
 
-app = rx.App()
+app = rx.App(
+    theme=rx.theme(
+        appearance="dark",
+        has_background=True,
+        radius="large",
+        accent_color="green",
+    )
+)
 app.add_page(index)
